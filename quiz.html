@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz de Cultura General</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .question { margin-bottom: 20px; }
+        .options { margin-bottom: 20px; }
+        button { margin-top: 10px; }
+        #history { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Quiz de Cultura General</h1>
+    <div id="quiz-container">
+        <div class="question" id="question"></div>
+        <div class="options" id="options"></div>
+        <button id="next">Siguiente</button>
+    </div>
+    <div id="result" style="display: none;"></div>
+    <label for="name">Nombre del Participante:</label>
+    <input type="text" id="name" placeholder="">
+    <button id="clear-history">Borrar Historial</button>
+    <h2>Historial de Puntuaciones</h2>
+    <ul id="history"></ul>
+
+    <footer>
+        <p>Realizado por: YESICA VALENTINA BOLAÑOS 11 B</p>
+    </footer>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál es la capital de Francia?",
+                options: ["Berlín", "Madrid", "París", "Lisboa"],
+                answer: 2
+            },
+            {
+                question: "¿Quién escribió 'Cien años de soledad'?",
+                options: ["Gabriel García Márquez", "Jorge Luis Borges", "Pablo Neruda", "Mario Vargas Llosa"],
+                answer: 0
+            },
+            {
+                question: "¿Cuál es el océano más grande del mundo?",
+                options: ["Atlántico", "Índico", "Pacífico", "Ártico"],
+                answer: 2
+            },
+            {
+                question: "¿Qué país es conocido como la Tierra de los Faraones?",
+                options: ["Grecia", "Roma", "Egipto", "Mesopotamia"],
+                answer: 2
+            },
+            {
+                question: "¿En qué año llegó el hombre a la luna?",
+                options: ["1965", "1969", "1971", "1975"],
+                answer: 1
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        function displayQuestion() {
+            const questionElement = document.getElementById('question');
+            const optionsElement = document.getElementById('options');
+            questionElement.innerText = questions[currentQuestionIndex].question;
+            optionsElement.innerHTML = '';
+
+            questions[currentQuestionIndex].options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.innerText = option;
+                button.onclick = () => selectOption(index);
+                optionsElement.appendChild(button);
+            });
+        }
+
+        function selectOption(index) {
+            if (index === questions[currentQuestionIndex].answer) {
+                score++;
+            }
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            const resultElement = document.getElementById('result');
+            const name = document.getElementById('name').value || "Desconocido";
+            const dateTime = new Date().toLocaleString();
+            resultElement.innerText = `Tu puntuación es: ${score} de ${questions.length}`;
+            resultElement.style.display = 'block';
+            saveScore(name, score, dateTime);
+            updateHistory();
+            document.getElementById('quiz-container').style.display = 'none';
+            document.getElementById('next').style.display = 'none'; // Hide the next button
+        }
+
+        function saveScore(name, score, dateTime) {
+            const history = JSON.parse(localStorage.getItem('quizHistory')) || [];
+            history.push({ name, score, dateTime });
+            localStorage.setItem('quizHistory', JSON.stringify(history));
+        }
+
+        function updateHistory() {
+            const historyList = document.getElementById('history');
+            historyList.innerHTML = '';
+            const history = JSON.parse(localStorage.getItem('quizHistory')) || [];
+            history.forEach((entry) => {
+                const li = document.createElement('li');
+                li.textContent = `${entry.name} - ${entry.score} - ${entry.dateTime}`; // Fixed template literal
+                historyList.appendChild(li);
+            });
+        }
+
+        document.getElementById('clear-history').onclick = () => {
+            localStorage.removeItem('quizHistory');
+            updateHistory();
+        };
+
+        document.getElementById('next').onclick = () => {
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                showResult();
+            }
+        };
+
+        displayQuestion();
+        updateHistory();
+    </script>
+</body>
+</html>
